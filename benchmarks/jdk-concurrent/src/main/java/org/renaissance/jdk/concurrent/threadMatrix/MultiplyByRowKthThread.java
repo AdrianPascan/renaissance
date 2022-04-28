@@ -44,7 +44,5 @@ public class MultiplyByRowKthThread extends Thread {
                 exception.printStackTrace();
             }
         });
-
-        System.out.println(C);
     }
 }

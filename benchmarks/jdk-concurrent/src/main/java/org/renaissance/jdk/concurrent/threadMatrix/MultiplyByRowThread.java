@@ -56,7 +56,5 @@ public class MultiplyByRowThread extends Thread {
                 exception.printStackTrace();
             }
         });
-
-        System.out.println(C.toString());
     }
 }

@@ -65,8 +65,6 @@ public class MultiplyByColumnThreadPool implements Runnable {
                 exception.printStackTrace();
             }
         });
-
-        System.out.println(C.toString());
     }
 }
 
