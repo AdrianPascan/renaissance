@@ -3,7 +3,6 @@ package org.renaissance.jdk.concurrent.matrix;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 public class Matrix {
     private int rowsNo;

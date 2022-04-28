@@ -56,7 +56,5 @@ public class MultiplyByColumnThread extends Thread {
                 exception.printStackTrace();
             }
         });
-
-        System.out.println(C);
     }
 }

@@ -65,7 +65,5 @@ public class MultiplyByRowThreadPool implements Runnable {
                 exception.printStackTrace();
             }
         });
-
-        System.out.println(C.toString());
     }
 }
