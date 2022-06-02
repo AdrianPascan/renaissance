@@ -1,12 +1,12 @@
 package org.renaissance.jdk.concurrent;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
-import org.renaissance.jdk.concurrent.threadMatrix.MultiplyByColumnThread;
-import org.renaissance.jdk.concurrent.threadMatrix.MultiplyByRowKthThread;
-import org.renaissance.jdk.concurrent.threadMatrix.MultiplyByRowThread;
-import org.renaissance.jdk.concurrent.threadPoolMatrix.MultiplyByColumnThreadPool;
-import org.renaissance.jdk.concurrent.threadPoolMatrix.MultiplyByRowKthThreadPool;
-import org.renaissance.jdk.concurrent.threadPoolMatrix.MultiplyByRowThreadPool;
+import org.renaissance.jdk.concurrent.threadMatrixMultiplication.MultiplyByColumnThread;
+import org.renaissance.jdk.concurrent.threadMatrixMultiplication.MultiplyByRowKthThread;
+import org.renaissance.jdk.concurrent.threadMatrixMultiplication.MultiplyByRowThread;
+import org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication.MultiplyByColumnThreadPool;
+import org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication.MultiplyByRowKthThreadPool;
+import org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication.MultiplyByRowThreadPool;
 
 import java.util.Arrays;
 
@@ -18,20 +18,17 @@ public final class JavaMatrixMultiply {
     private final Matrix C = new Matrix(3, 4, Arrays.asList(11,14,17,20,23,30,37,44,35,46,57,68));
 
     public Matrix run(int tasksNo) throws InterruptedException {
-        Thread thread = new MultiplyByRowThread(A, B, tasksNo);
-        thread.start();
-        thread.join();
+        Runnable runnable = new MultiplyByRowThread(A, B, tasksNo);
+        runnable.run();
 
-        thread = new MultiplyByColumnThread(A, B, tasksNo);
-        thread.start();
-        thread.join();
+        runnable = new MultiplyByColumnThread(A, B, tasksNo);
+        runnable.run();
 
-        thread = new MultiplyByRowKthThread(A, B, tasksNo);
-        thread.start();
-        thread.join();
+        runnable = new MultiplyByRowKthThread(A, B, tasksNo);
+        runnable.run();
 
         // thread pool(2)
-        Runnable runnable = new MultiplyByRowThreadPool(A, B, tasksNo, 2);
+        runnable = new MultiplyByRowThreadPool(A, B, tasksNo, 2);
         runnable.run();
 
         runnable = new MultiplyByColumnThreadPool(A, B, tasksNo, 2);

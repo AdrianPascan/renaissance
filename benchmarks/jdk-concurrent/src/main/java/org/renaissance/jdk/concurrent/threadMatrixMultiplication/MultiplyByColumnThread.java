@@ -1,14 +1,14 @@
-package org.renaissance.jdk.concurrent.threadMatrix;
+package org.renaissance.jdk.concurrent.threadMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplicationException;
-import org.renaissance.jdk.concurrent.threads.MultiplyPartiallyByColumnThread;
+import org.renaissance.jdk.concurrent.threadPartialMatrixMultiplication.MultiplyPartiallyByColumnThread;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiplyByColumnThread extends Thread {
+public class MultiplyByColumnThread implements Runnable {
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;

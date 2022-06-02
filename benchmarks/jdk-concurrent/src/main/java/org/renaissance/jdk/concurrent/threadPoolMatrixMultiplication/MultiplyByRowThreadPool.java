@@ -1,9 +1,9 @@
-package org.renaissance.jdk.concurrent.threadPoolMatrix;
+package org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplicationException;
-import org.renaissance.jdk.concurrent.runnables.MultiplyPartiallyByColumnRunnable;
+import org.renaissance.jdk.concurrent.runnablePartialMatrixMultiplication.MultiplyPartiallyByRowRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +12,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class MultiplyByColumnThreadPool implements Runnable {
+public class MultiplyByRowThreadPool implements Runnable {
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;
     private final int tasksNo;
     private final int maxThreadsNo;
 
-    public MultiplyByColumnThreadPool(Matrix A, Matrix B, int tasksNo, int maxThreadsNo) {
+    public MultiplyByRowThreadPool(Matrix A, Matrix B, int tasksNo, int maxThreadsNo) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
         if (tasksNo > C.getRowsNo() * C.getColumnsNo()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: MultiplyByColumn");
@@ -38,18 +38,18 @@ public class MultiplyByColumnThreadPool implements Runnable {
 
         for (int taskIndex = 0; taskIndex < tasksNo - 1; taskIndex++) {
             int index = taskIndex * elementsNoPerTask;
-            int startRowIndex = index / C.getRowsNo();
-            int startColumnIndex = index % C.getRowsNo();
+            int startRowIndex = index / C.getColumnsNo();
+            int startColumnIndex = index % C.getColumnsNo();
 
-            Runnable runnable = new MultiplyPartiallyByColumnRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
+            Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
             runnables.add(runnable);
         }
         // last thread
         int index = (tasksNo - 1) * elementsNoPerTask;
-        int startRowIndex = index / C.getRowsNo();
-        int startColumnIndex = index % C.getRowsNo();
+        int startRowIndex = index / C.getColumnsNo();
+        int startColumnIndex = index % C.getColumnsNo();
         elementsNoPerTask += C.getElementsNo() % tasksNo;
-        Runnable runnable = new MultiplyPartiallyByColumnRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
+        Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
         runnables.add(runnable);
 
         ExecutorService executorService = Executors.newFixedThreadPool(maxThreadsNo);
@@ -68,4 +68,3 @@ public class MultiplyByColumnThreadPool implements Runnable {
         executorService.shutdown();
     }
 }
-

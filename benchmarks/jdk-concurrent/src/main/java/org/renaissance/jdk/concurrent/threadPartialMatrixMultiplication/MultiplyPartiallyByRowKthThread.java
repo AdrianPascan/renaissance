@@ -1,4 +1,4 @@
-package org.renaissance.jdk.concurrent.threads;
+package org.renaissance.jdk.concurrent.threadPartialMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;

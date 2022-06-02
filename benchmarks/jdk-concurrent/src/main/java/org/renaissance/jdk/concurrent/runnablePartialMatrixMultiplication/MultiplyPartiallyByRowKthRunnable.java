@@ -1,4 +1,4 @@
-package org.renaissance.jdk.concurrent.runnables;
+package org.renaissance.jdk.concurrent.runnablePartialMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;
