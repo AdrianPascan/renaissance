@@ -17,7 +17,7 @@ public class MultiplyByColumnThreadPool implements Runnable {
     private final Matrix B;
     private final Matrix C;
     private final int tasksNo;
-    private final ExecutorService executorService;
+    private final int maxThreadsNo;
 
     public MultiplyByColumnThreadPool(Matrix A, Matrix B, int tasksNo, int maxThreadsNo) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
@@ -28,8 +28,7 @@ public class MultiplyByColumnThreadPool implements Runnable {
         this.A = A;
         this.B = B;
         this.tasksNo = tasksNo;
-
-        executorService = Executors.newFixedThreadPool(maxThreadsNo);
+        this.maxThreadsNo = maxThreadsNo;
     }
 
     @Override
@@ -53,6 +52,7 @@ public class MultiplyByColumnThreadPool implements Runnable {
         Runnable runnable = new MultiplyPartiallyByColumnRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
         runnables.add(runnable);
 
+        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadsNo);
         List<Future<?>> futures = new ArrayList<>();
         runnables.forEach(r -> {
             Future<?> future = executorService.submit(r);
@@ -65,6 +65,7 @@ public class MultiplyByColumnThreadPool implements Runnable {
                 exception.printStackTrace();
             }
         });
+        executorService.shutdown();
     }
 }
 

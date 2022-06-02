@@ -26,7 +26,7 @@ This allows you to execute the following `java` command:
 
 
 ```
-$ java -jar 'renaissance-gpl-0.14.1.jar' <benchmarks>
+$ java -jar 'renaissance-gpl-0.14.0.jar' <benchmarks>
 ```
 
 Above, `<benchmarks>` is the list of benchmarks that you wish to run.
@@ -106,6 +106,10 @@ The following is the complete list of benchmarks, separated into groups.
 - `fj-kmeans` - Runs the k-means algorithm using the fork/join framework.
   \
   Default repetitions: 30; APACHE2 license, MIT distribution; Supported JVM: 1.8 and later
+
+- `matrix-multiply` - Runs matrix multiplication using different concurrency strategies (threads, runnables, thread pools) and different partial multiplication techniques (consecutive elements by row/column, k-th elements).
+  \
+  Default repetitions: 20;  license, MIT distribution; Supported JVM: 1.8 and later
 
 - `reactors` - Runs benchmarks inspired by the Savina microbenchmark workloads in a sequence on Reactors.IO.
   \
@@ -268,7 +272,7 @@ arguments to that plugin (or policy).
 The following is a complete list of command-line options.
 
 ```
-Renaissance Benchmark Suite, version 0.14.1
+Renaissance Benchmark Suite, version 0.14.0
 Usage: renaissance [options] [benchmark-specification]
 
   -h, --help               Prints this usage text.
@@ -315,7 +319,7 @@ $ tools/sbt/bin/sbt renaissanceJmhPackage
 To run the benchmarks using JMH, you can execute the following `java` command:
 
 ```
-$ java -jar 'renaissance-jmh/target/renaissance-jmh-0.14.1.jar'
+$ java -jar 'renaissance-jmh/target/renaissance-jmh-0.14.0.jar'
 ```
 
 

@@ -17,7 +17,7 @@ public class MultiplyByRowKthThreadPool implements Runnable {
     private final Matrix B;
     private final Matrix C;
     private final int tasksNo;
-    private final ExecutorService executorService;
+    private final int maxThreadsNo;
 
     public MultiplyByRowKthThreadPool(Matrix A, Matrix B, int tasksNo, int maxThreadsNo) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
@@ -28,19 +28,18 @@ public class MultiplyByRowKthThreadPool implements Runnable {
         this.A = A;
         this.B = B;
         this.tasksNo = tasksNo;
-
-        executorService = Executors.newFixedThreadPool(maxThreadsNo);
+        this.maxThreadsNo = maxThreadsNo;
     }
 
     @Override
     public void run() {
         List<Runnable> runnables = new ArrayList<>();
-
         for (int orderNo = 0; orderNo < tasksNo; orderNo++) {
             Runnable runnable = new MultiplyPartiallyByRowKthRunnable(A, B, C, tasksNo, orderNo);
             runnables.add(runnable);
         }
 
+        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadsNo);
         List<Future<?>> futures = new ArrayList<>();
         runnables.forEach(r -> {
             Future<?> future = executorService.submit(r);
@@ -53,5 +52,6 @@ public class MultiplyByRowKthThreadPool implements Runnable {
                 exception.printStackTrace();
             }
         });
+        executorService.shutdown();
     }
 }
