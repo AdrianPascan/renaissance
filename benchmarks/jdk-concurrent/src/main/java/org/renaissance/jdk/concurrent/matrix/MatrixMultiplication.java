@@ -1,35 +1,36 @@
 package org.renaissance.jdk.concurrent.matrix;
 
 public class MatrixMultiplication {
+
     public static Matrix emptyMatrixOfMultiply(Matrix A, Matrix B) {
-        if (A.getColumnsNo() != B.getRowsNo()) {
+        if (A.getColumnCount() != B.getRowCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException:" +
                     " cannot perform matrix multiplication on matrices of sizes" +
-                    " (" + A.getRowsNo() + ", " + A.getColumnsNo() + ") and" +
-                    " (" + B.getRowsNo() + ", " + B.getColumnsNo() + ")" +
-                    " as " + A.getColumnsNo() + "!=" + B.getRowsNo());
+                    " (" + A.getRowCount() + ", " + A.getColumnCount() + ") and" +
+                    " (" + B.getRowCount() + ", " + B.getColumnCount() + ")" +
+                    " as " + A.getColumnCount() + "!=" + B.getRowCount());
         }
 
-        return new Matrix(A.getRowsNo(), B.getColumnsNo());
+        return new Matrix(A.getRowCount(), B.getColumnCount());
     }
 
     private static int multiplyForElement(Matrix A, Matrix B, int rowIndex, int columnIndex) {
         int result = 0;
-        for (int commonIndex = 0; commonIndex < A.getColumnsNo(); commonIndex++) {
+        for (int commonIndex = 0; commonIndex < A.getColumnCount(); commonIndex++) {
             result += A.getElements().get(rowIndex).get(commonIndex) * B.getElements().get(commonIndex).get(columnIndex);
         }
         return result;
     }
 
-    public static void multiplyByRowForConsecutiveElements(Matrix A, Matrix B, Matrix C, int elementsNo, int startRowIndex, int startColumnIndex) {
+    public static void multiplyByRowForConsecutiveElements(Matrix A, Matrix B, Matrix C, int elementCount, int startRowIndex, int startColumnIndex) {
         int rowIndex = startRowIndex;
         int columnIndex = startColumnIndex;
 
-        for (int elementNo = 0; elementNo < elementsNo; elementNo++) {
-            if (columnIndex >= C.getColumnsNo()) {
+        for (int elementNo = 0; elementNo < elementCount; elementNo++) {
+            if (columnIndex >= C.getColumnCount()) {
                 columnIndex = 0;
                 rowIndex++;
-                if (rowIndex >= C.getRowsNo()){
+                if (rowIndex >= C.getRowCount()){
                     throw new MatrixMultiplicationException("MatrixMultiplicationException: multiplyByRowForConsecutiveElements");
                 }
             }
@@ -41,15 +42,15 @@ public class MatrixMultiplication {
         }
     }
 
-    public static void multiplyByColumnForConsecutiveElements(Matrix A, Matrix B, Matrix C, int elementsNo, int startRowIndex, int startColumnIndex) {
+    public static void multiplyByColumnForConsecutiveElements(Matrix A, Matrix B, Matrix C, int elementCount, int startRowIndex, int startColumnIndex) {
         int rowIndex = startRowIndex;
         int columnIndex = startColumnIndex;
 
-        for (int elementNo = 0; elementNo < elementsNo; elementNo++) {
-            if (rowIndex >= C.getRowsNo()) {
+        for (int elementNo = 0; elementNo < elementCount; elementNo++) {
+            if (rowIndex >= C.getRowCount()) {
                 rowIndex = 0;
                 columnIndex++;
-                if (columnIndex >= C.getColumnsNo()){
+                if (columnIndex >= C.getColumnCount()){
                     throw new MatrixMultiplicationException("MatrixMultiplicationException: multiplyByColumnForConsecutiveElements");
                 }
             }
@@ -61,15 +62,15 @@ public class MatrixMultiplication {
         }
     }
 
-    public static void multiplyByRowForEveryKthElement(Matrix A, Matrix B, Matrix C, int k, int orderNo) {
-        int index = orderNo;
-        if (k <= orderNo || index >= C.getElementsNo()) {
+    public static void multiplyByRowForEveryKthElement(Matrix A, Matrix B, Matrix C, int k, int partialMultiplicationNo) {
+        int index = partialMultiplicationNo;
+        if (k <= partialMultiplicationNo || index >= C.getElementCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: multiplyByRowForEveryKthElement");
         }
 
-        while(index < C.getElementsNo()) {
-            int rowIndex = index / C.getColumnsNo();
-            int columnIndex = index % C.getColumnsNo();
+        while(index < C.getElementCount()) {
+            int rowIndex = index / C.getColumnCount();
+            int columnIndex = index % C.getColumnCount();
 
             int element = multiplyForElement(A, B, rowIndex, columnIndex);
             C.getElements().get(rowIndex).set(columnIndex, element);

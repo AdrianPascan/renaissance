@@ -5,63 +5,78 @@ import java.util.List;
 import java.util.Vector;
 
 public class Matrix {
-    private int rowsNo;
-    private int columnsNo;
+
+    private int rowCount;
+    private int columnCount;
     private Vector<Vector<Integer>> elements; //thread-safe
 
     public Matrix(int order) {
-        this.rowsNo = this.columnsNo =  order;
+        this.rowCount = this.columnCount = order;
         initialiseElements();
     }
 
-    public Matrix(int rowsNo, int columnsNo) {
-        this.rowsNo = rowsNo;
-        this.columnsNo = columnsNo;
+    public Matrix(int rowCount, int columnCount) {
+        this.rowCount = rowCount;
+        this.columnCount = columnCount;
         initialiseElements();
     }
 
-    public Matrix(int rowsNo, int columsNo, List<Integer> elements) {
-        if (elements.size() != rowsNo * columsNo) {
-            throw new MatrixException("MatrixException: no. of elements is different than the capacity of the matrix");
-        }
+    public Matrix(int rowCount, int columnCount, int startElement) {
+        this.rowCount = rowCount;
+        this.columnCount = columnCount;
 
-        this.rowsNo = rowsNo;
-        this.columnsNo = columsNo;
-
-        this.elements = new Vector<>(rowsNo);
-        for (int rowIndex = 0; rowIndex < rowsNo; rowIndex++) {
-            Vector<Integer> row = new Vector<>(elements.subList(rowIndex * columsNo, (rowIndex + 1) * columsNo));
+        this.elements = new Vector<>(rowCount);
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+            Vector<Integer> row = new Vector<>(columnCount);
+            for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                row.add(startElement + rowIndex * rowCount + columnIndex);
+            }
             this.elements.add(row);
         }
     }
 
-    public int getElementsNo() {
-        return rowsNo * columnsNo;
+    public Matrix(int rowCount, int columnCount, List<Integer> elements) {
+        if (elements.size() != rowCount * columnCount) {
+            throw new MatrixException("MatrixException: no. of elements is different than the capacity of the matrix");
+        }
+
+        this.rowCount = rowCount;
+        this.columnCount = columnCount;
+
+        this.elements = new Vector<>(rowCount);
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+            Vector<Integer> row = new Vector<>(elements.subList(rowIndex * columnCount, (rowIndex + 1) * columnCount));
+            this.elements.add(row);
+        }
     }
 
     private void initialiseElements() {
-        elements = new Vector<>(rowsNo);
-        for (int rowIndex = 0; rowIndex < rowsNo; rowIndex++) {
-            Vector<Integer> row = new Vector<>(columnsNo);
-            row.addAll(Collections.nCopies(columnsNo, 0));
+        elements = new Vector<>(rowCount);
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+            Vector<Integer> row = new Vector<>(columnCount);
+            row.addAll(Collections.nCopies(columnCount, 0));
             elements.add(row);
         }
     }
 
-    public int getRowsNo() {
-        return rowsNo;
+    public int getElementCount() {
+        return rowCount * columnCount;
     }
 
-    public void setRowsNo(int rowsNo) {
-        this.rowsNo = rowsNo;
+    public int getRowCount() {
+        return rowCount;
     }
 
-    public int getColumnsNo() {
-        return columnsNo;
+    public void setRowCount(int rowCount) {
+        this.rowCount = rowCount;
     }
 
-    public void setColumnsNo(int columnsNo) {
-        this.columnsNo = columnsNo;
+    public int getColumnCount() {
+        return columnCount;
+    }
+
+    public void setColumnCount(int columnCount) {
+        this.columnCount = columnCount;
     }
 
     public Vector<Vector<Integer>> getElements() {

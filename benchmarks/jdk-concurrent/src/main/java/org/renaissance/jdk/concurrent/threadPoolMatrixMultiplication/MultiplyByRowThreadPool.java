@@ -13,46 +13,47 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MultiplyByRowThreadPool implements Runnable {
+
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;
-    private final int tasksNo;
-    private final int maxThreadsNo;
+    private final int partialMultiplicationCount;
+    private final int maxThreadCount;
 
-    public MultiplyByRowThreadPool(Matrix A, Matrix B, int tasksNo, int maxThreadsNo) {
+    public MultiplyByRowThreadPool(Matrix A, Matrix B, int partialMultiplicationCount, int maxThreadCount) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
-        if (tasksNo > C.getRowsNo() * C.getColumnsNo()) {
+        if (partialMultiplicationCount > C.getRowCount() * C.getColumnCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: MultiplyByColumn");
         }
 
         this.A = A;
         this.B = B;
-        this.tasksNo = tasksNo;
-        this.maxThreadsNo = maxThreadsNo;
+        this.partialMultiplicationCount = partialMultiplicationCount;
+        this.maxThreadCount = maxThreadCount;
     }
 
     @Override
     public void run() {
         List<Runnable> runnables = new ArrayList<>();
-        int elementsNoPerTask = C.getElementsNo() / tasksNo;
+        int elementCountPerPartialMultiplication = C.getElementCount() / partialMultiplicationCount;
 
-        for (int taskIndex = 0; taskIndex < tasksNo - 1; taskIndex++) {
-            int index = taskIndex * elementsNoPerTask;
-            int startRowIndex = index / C.getColumnsNo();
-            int startColumnIndex = index % C.getColumnsNo();
+        for (int partialMultiplicationNo = 0; partialMultiplicationNo < partialMultiplicationCount - 1; partialMultiplicationNo++) {
+            int index = partialMultiplicationNo * elementCountPerPartialMultiplication;
+            int startRowIndex = index / C.getColumnCount();
+            int startColumnIndex = index % C.getColumnCount();
 
-            Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
+            Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
             runnables.add(runnable);
         }
-        // last thread
-        int index = (tasksNo - 1) * elementsNoPerTask;
-        int startRowIndex = index / C.getColumnsNo();
-        int startColumnIndex = index % C.getColumnsNo();
-        elementsNoPerTask += C.getElementsNo() % tasksNo;
-        Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementsNoPerTask, startRowIndex, startColumnIndex);
+        // last partial multiplication
+        int index = (partialMultiplicationCount - 1) * elementCountPerPartialMultiplication;
+        int startRowIndex = index / C.getColumnCount();
+        int startColumnIndex = index % C.getColumnCount();
+        elementCountPerPartialMultiplication += C.getElementCount() % partialMultiplicationCount;
+        Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
         runnables.add(runnable);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadsNo);
+        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadCount);
         List<Future<?>> futures = new ArrayList<>();
         runnables.forEach(r -> {
             Future<?> future = executorService.submit(r);

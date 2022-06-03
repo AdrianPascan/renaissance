@@ -1,23 +1,21 @@
-package org.renaissance.jdk.concurrent.threadMatrixMultiplication;
+package org.renaissance.jdk.concurrent.sequentialMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplicationException;
-import org.renaissance.jdk.concurrent.threadPartialMatrixMultiplication.MultiplyPartiallyByRowKthThread;
+import org.renaissance.jdk.concurrent.runnablePartialMatrixMultiplication.MultiplyPartiallyByRowKthRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiplyByRowKthThread implements Runnable {
+public class MultiplyByRowKthSequential implements Runnable {
 
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;
     private final int partialMultiplicationCount;
 
-    public MultiplyByRowKthThread(Matrix A, Matrix B, int partialMultiplicationCount) {
-        super();
-
+    public MultiplyByRowKthSequential(Matrix A, Matrix B, int partialMultiplicationCount) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
         if (partialMultiplicationCount > C.getRowCount() * C.getColumnCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: MultiplyByColumn");
@@ -30,20 +28,11 @@ public class MultiplyByRowKthThread implements Runnable {
 
     @Override
     public void run() {
-        List<Thread> threads = new ArrayList<>();
-
+        List<Runnable> runnables = new ArrayList<>();
         for (int partialMultiplicationNo = 0; partialMultiplicationNo < partialMultiplicationCount; partialMultiplicationNo++) {
-            Thread thread = new MultiplyPartiallyByRowKthThread(A, B, C, partialMultiplicationCount, partialMultiplicationNo);
-            threads.add(thread);
+            Runnable runnable = new MultiplyPartiallyByRowKthRunnable(A, B, C, partialMultiplicationCount, partialMultiplicationNo);
+            runnables.add(runnable);
         }
-
-        threads.forEach(Thread::start);
-        threads.forEach(t -> {
-            try {
-                t.join();
-            } catch (InterruptedException exception) {
-                exception.printStackTrace();
-            }
-        });
+        runnables.forEach(Runnable::run);
     }
 }

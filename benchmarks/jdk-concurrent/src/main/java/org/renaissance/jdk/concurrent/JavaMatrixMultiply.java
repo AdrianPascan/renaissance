@@ -1,6 +1,9 @@
 package org.renaissance.jdk.concurrent;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
+import org.renaissance.jdk.concurrent.sequentialMatrixMultiplication.MultiplyByColumnSequential;
+import org.renaissance.jdk.concurrent.sequentialMatrixMultiplication.MultiplyByRowKthSequential;
+import org.renaissance.jdk.concurrent.sequentialMatrixMultiplication.MultiplyByRowSequential;
 import org.renaissance.jdk.concurrent.threadMatrixMultiplication.MultiplyByColumnThread;
 import org.renaissance.jdk.concurrent.threadMatrixMultiplication.MultiplyByRowKthThread;
 import org.renaissance.jdk.concurrent.threadMatrixMultiplication.MultiplyByRowThread;
@@ -9,54 +12,124 @@ import org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication.MultiplyByR
 import org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication.MultiplyByRowThreadPool;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public final class JavaMatrixMultiply {
 
-    private final Matrix A = new Matrix(3, 2, Arrays.asList(1,2,3,4,5,6));
-    private final Matrix B = new Matrix(2, 4, Arrays.asList(1,2,3,4,5,6,7,8));
-//    Result matrix:
-    private final Matrix C = new Matrix(3, 4, Arrays.asList(11,14,17,20,23,30,37,44,35,46,57,68));
+    private Matrix A;
+    private Matrix B;
+    private Runnable multiplication;
 
-    public Matrix run(int tasksNo) throws InterruptedException {
-        Runnable runnable = new MultiplyByRowThread(A, B, tasksNo);
-        runnable.run();
+    public JavaMatrixMultiply(int rowCount, int commonCount, int columnCount,
+                              PartialMultiplication partialMultiplication, int partialMultiplicationCount,
+                              Concurrency concurrency, int maxThreadCount) {
+        generateMatrices(rowCount, commonCount, columnCount);
+        initializeMultiplication(partialMultiplication, partialMultiplicationCount, concurrency, maxThreadCount);
 
-        runnable = new MultiplyByColumnThread(A, B, tasksNo);
-        runnable.run();
+        System.out.println("ROW_COUNT= " + rowCount);
+        System.out.println("COMMON_COUNT= " + commonCount);
+        System.out.println("COLUMN_COUNT= " + columnCount);
+        System.out.println("PARTIAL_MULTIPLICATION= " + partialMultiplication);
+        System.out.println("PARTIAL_MULTIPLICATION_COUNT= " + partialMultiplicationCount);
+        System.out.println("CONCURRENCY= " + concurrency);
+        System.out.println("CONCURRENCY_COUNT= " + maxThreadCount);
+    }
 
-        runnable = new MultiplyByRowKthThread(A, B, tasksNo);
-        runnable.run();
+    private void generateMatrices(int rowCount, int commonCount, int columnCount) {
+        A = new Matrix(rowCount, commonCount, 0);
+        B = new Matrix(commonCount, columnCount, rowCount * commonCount);
+    }
 
-        // thread pool(2)
-        runnable = new MultiplyByRowThreadPool(A, B, tasksNo, 2);
-        runnable.run();
+    private void initializeMultiplication(PartialMultiplication partialMultiplication, int partialMultiplicationCount,
+                                          Concurrency concurrency, int maxThreadCount) {
+        switch (concurrency) {
+            case SEQUENTIAL:
+                switch (partialMultiplication) {
+                    case ROW:
+                        multiplication = new MultiplyByRowSequential(A, B, partialMultiplicationCount);
+                        break;
+                    case COLUMN:
+                        multiplication = new MultiplyByColumnSequential(A, B, partialMultiplicationCount);
+                        break;
+                    case ROW_KTH:
+                        multiplication = new MultiplyByRowKthSequential(A, B, partialMultiplicationCount);
+                        break;
+                }
+                break;
+            case THREAD:
+                switch (partialMultiplication) {
+                    case ROW:
+                        multiplication = new MultiplyByRowThread(A, B, partialMultiplicationCount);
+                        break;
+                    case COLUMN:
+                        multiplication = new MultiplyByColumnThread(A, B, partialMultiplicationCount);
+                        break;
+                    case ROW_KTH:
+                        multiplication = new MultiplyByRowKthThread(A, B, partialMultiplicationCount);
+                        break;
+                }
+                break;
+            case THREAD_POOL:
+                switch (partialMultiplication) {
+                    case ROW:
+                        multiplication = new MultiplyByRowThreadPool(A, B, partialMultiplicationCount, maxThreadCount);
+                        break;
+                    case COLUMN:
+                        multiplication = new MultiplyByColumnThreadPool(A, B, partialMultiplicationCount, maxThreadCount);
+                        break;
+                    case ROW_KTH:
+                        multiplication = new MultiplyByRowKthThreadPool(A, B, partialMultiplicationCount, maxThreadCount);
+                        break;
+                }
+                break;
+        }
+    }
 
-        runnable = new MultiplyByColumnThreadPool(A, B, tasksNo, 2);
-        runnable.run();
+    public void run() {
+        multiplication.run();
+    }
 
-        runnable = new MultiplyByRowKthThreadPool(A, B, tasksNo, 2);
-        runnable.run();
+    public enum PartialMultiplication {
+        ROW("row"), COLUMN("col"), ROW_KTH("row_kth");
 
-        // thread pool(5)
-        runnable = new MultiplyByRowThreadPool(A, B, tasksNo, 5);
-        runnable.run();
+        private final String parameter;
 
-        runnable = new MultiplyByColumnThreadPool(A, B, tasksNo, 5);
-        runnable.run();
+        PartialMultiplication(String parameter) {
+            this.parameter = parameter;
+        }
 
-        runnable = new MultiplyByRowKthThreadPool(A, B, tasksNo, 5);
-        runnable.run();
+        public String getParameter() {
+            return parameter;
+        }
 
-        // thread pool(10)
-        runnable = new MultiplyByRowThreadPool(A, B, tasksNo, 10);
-        runnable.run();
+        public static PartialMultiplication getDefaultPartialMultiplication() {
+            return ROW;
+        }
 
-        runnable = new MultiplyByColumnThreadPool(A, B, tasksNo, 10);
-        runnable.run();
+        public static Optional<PartialMultiplication> getPartialMultiplicationByParameter(String parameter) {
+            return Arrays.stream(PartialMultiplication.values()).filter(pm -> pm.parameter.equals(parameter)).findAny();
+        }
+    }
 
-        runnable = new MultiplyByRowKthThreadPool(A, B, tasksNo, 10);
-        runnable.run();
+    public enum Concurrency {
+        SEQUENTIAL("seq"), THREAD("thread"), THREAD_POOL("pool");
 
-        return C;
+        private final String parameter;
+
+        Concurrency(String parameter) {
+            this.parameter = parameter;
+        }
+
+        public String getParameter() {
+            return parameter;
+        }
+
+        public static Concurrency getDefaultConcurrency() {
+            return SEQUENTIAL;
+        }
+
+        public static Optional<Concurrency> getConcurrencyByParameter(String parameter) {
+            return Arrays.stream(Concurrency.values()).filter(c -> c.parameter.equals(parameter)).findAny();
+        }
     }
 }

@@ -1,23 +1,21 @@
-package org.renaissance.jdk.concurrent.threadMatrixMultiplication;
+package org.renaissance.jdk.concurrent.sequentialMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplicationException;
-import org.renaissance.jdk.concurrent.threadPartialMatrixMultiplication.MultiplyPartiallyByColumnThread;
+import org.renaissance.jdk.concurrent.runnablePartialMatrixMultiplication.MultiplyPartiallyByRowRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiplyByColumnThread implements Runnable {
+public class MultiplyByRowSequential implements Runnable {
 
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;
     private final int partialMultiplicationCount;
 
-    public MultiplyByColumnThread(Matrix A, Matrix B, int partialMultiplicationCount) {
-        super();
-
+    public MultiplyByRowSequential(Matrix A, Matrix B, int partialMultiplicationCount) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
         if (partialMultiplicationCount > C.getRowCount() * C.getColumnCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: MultiplyByColumn");
@@ -30,32 +28,25 @@ public class MultiplyByColumnThread implements Runnable {
 
     @Override
     public void run() {
-        List<Thread> threads = new ArrayList<>();
+        List<Runnable> runnables = new ArrayList<>();
         int elementCountPerPartialMultiplication = C.getElementCount() / partialMultiplicationCount;
 
         for (int partialMultiplicationNo = 0; partialMultiplicationNo < partialMultiplicationCount - 1; partialMultiplicationNo++) {
             int index = partialMultiplicationNo * elementCountPerPartialMultiplication;
-            int startRowIndex = index % C.getRowCount();
-            int startColumnIndex = index / C.getRowCount();
+            int startRowIndex = index / C.getColumnCount();
+            int startColumnIndex = index % C.getColumnCount();
 
-            Thread thread = new MultiplyPartiallyByColumnThread(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
-            threads.add(thread);
+            Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
+            runnables.add(runnable);
         }
         // last partial multiplication
         int index = (partialMultiplicationCount - 1) * elementCountPerPartialMultiplication;
-        int startRowIndex = index % C.getRowCount();
-        int startColumnIndex = index / C.getRowCount();
+        int startRowIndex = index / C.getColumnCount();
+        int startColumnIndex = index % C.getColumnCount();
         elementCountPerPartialMultiplication += C.getElementCount() % partialMultiplicationCount;
-        Thread thread = new MultiplyPartiallyByColumnThread(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
-        threads.add(thread);
+        Runnable runnable = new MultiplyPartiallyByRowRunnable(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
+        runnables.add(runnable);
 
-        threads.forEach(Thread::start);
-        threads.forEach(t -> {
-            try {
-                t.join();
-            } catch (InterruptedException exception) {
-                exception.printStackTrace();
-            }
-        });
+        runnables.forEach(Runnable::run);
     }
 }

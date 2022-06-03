@@ -1,4 +1,4 @@
-package org.renaissance.jdk.concurrent.threadPoolMatrixMultiplication;
+package org.renaissance.jdk.concurrent.sequentialMatrixMultiplication;
 
 import org.renaissance.jdk.concurrent.matrix.Matrix;
 import org.renaissance.jdk.concurrent.matrix.MatrixMultiplication;
@@ -7,20 +7,15 @@ import org.renaissance.jdk.concurrent.runnablePartialMatrixMultiplication.Multip
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-public class MultiplyByColumnThreadPool implements Runnable {
+public class MultiplyByColumnSequential implements Runnable {
 
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;
     private final int partialMultiplicationCount;
-    private final int maxThreadCount;
 
-    public MultiplyByColumnThreadPool(Matrix A, Matrix B, int partialMultiplicationCount, int maxThreadCount) {
+    public MultiplyByColumnSequential(Matrix A, Matrix B, int partialMultiplicationCount) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
         if (partialMultiplicationCount > C.getRowCount() * C.getColumnCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: MultiplyByColumn");
@@ -29,7 +24,6 @@ public class MultiplyByColumnThreadPool implements Runnable {
         this.A = A;
         this.B = B;
         this.partialMultiplicationCount = partialMultiplicationCount;
-        this.maxThreadCount = maxThreadCount;
     }
 
     @Override
@@ -53,20 +47,6 @@ public class MultiplyByColumnThreadPool implements Runnable {
         Runnable runnable = new MultiplyPartiallyByColumnRunnable(A, B, C, elementCountPerPartialMultiplication, startRowIndex, startColumnIndex);
         runnables.add(runnable);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadCount);
-        List<Future<?>> futures = new ArrayList<>();
-        runnables.forEach(r -> {
-            Future<?> future = executorService.submit(r);
-            futures.add(future);
-        });
-        futures.forEach(f -> {
-            try {
-                f.get();
-            } catch (InterruptedException | ExecutionException exception) {
-                exception.printStackTrace();
-            }
-        });
-        executorService.shutdown();
+        runnables.forEach(Runnable::run);
     }
 }
-

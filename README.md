@@ -107,7 +107,7 @@ The following is the complete list of benchmarks, separated into groups.
   \
   Default repetitions: 30; APACHE2 license, MIT distribution; Supported JVM: 1.8 and later
 
-- `matrix-multiply` - Runs matrix multiplication using different concurrency strategies (threads, runnables, thread pools) and different partial multiplication techniques (consecutive elements by row/column, k-th elements).
+- `matrix-multiply` - Runs matrix multiplication using different partial multiplication techniques (consecutive elements by row/column, k-th elements by row) and different concurrency strategies (sequential, threads, thread pools).
   \
   Default repetitions: 20;  license, MIT distribution; Supported JVM: 1.8 and later
 

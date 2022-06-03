@@ -13,33 +13,34 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MultiplyByRowKthThreadPool implements Runnable {
+
     private final Matrix A;
     private final Matrix B;
     private final Matrix C;
-    private final int tasksNo;
-    private final int maxThreadsNo;
+    private final int partialMultiplicationCount;
+    private final int maxThreadCount;
 
-    public MultiplyByRowKthThreadPool(Matrix A, Matrix B, int tasksNo, int maxThreadsNo) {
+    public MultiplyByRowKthThreadPool(Matrix A, Matrix B, int partialMultiplicationCount, int maxThreadCount) {
         C = MatrixMultiplication.emptyMatrixOfMultiply(A, B);
-        if (tasksNo > C.getRowsNo() * C.getColumnsNo()) {
+        if (partialMultiplicationCount > C.getRowCount() * C.getColumnCount()) {
             throw new MatrixMultiplicationException("MatrixMultiplicationException: MultiplyByColumn");
         }
 
         this.A = A;
         this.B = B;
-        this.tasksNo = tasksNo;
-        this.maxThreadsNo = maxThreadsNo;
+        this.partialMultiplicationCount = partialMultiplicationCount;
+        this.maxThreadCount = maxThreadCount;
     }
 
     @Override
     public void run() {
         List<Runnable> runnables = new ArrayList<>();
-        for (int orderNo = 0; orderNo < tasksNo; orderNo++) {
-            Runnable runnable = new MultiplyPartiallyByRowKthRunnable(A, B, C, tasksNo, orderNo);
+        for (int partialMultiplicationNo = 0; partialMultiplicationNo < partialMultiplicationCount; partialMultiplicationNo++) {
+            Runnable runnable = new MultiplyPartiallyByRowKthRunnable(A, B, C, partialMultiplicationCount, partialMultiplicationNo);
             runnables.add(runnable);
         }
 
-        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadsNo);
+        ExecutorService executorService = Executors.newFixedThreadPool(maxThreadCount);
         List<Future<?>> futures = new ArrayList<>();
         runnables.forEach(r -> {
             Future<?> future = executorService.submit(r);
