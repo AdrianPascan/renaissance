@@ -25,14 +25,6 @@ public final class JavaMatrixMultiply {
                               Concurrency concurrency, int maxThreadCount) {
         generateMatrices(rowCount, commonCount, columnCount);
         initializeMultiplication(partialMultiplication, partialMultiplicationCount, concurrency, maxThreadCount);
-
-        System.out.println("ROW_COUNT= " + rowCount);
-        System.out.println("COMMON_COUNT= " + commonCount);
-        System.out.println("COLUMN_COUNT= " + columnCount);
-        System.out.println("PARTIAL_MULTIPLICATION= " + partialMultiplication);
-        System.out.println("PARTIAL_MULTIPLICATION_COUNT= " + partialMultiplicationCount);
-        System.out.println("CONCURRENCY= " + concurrency);
-        System.out.println("CONCURRENCY_COUNT= " + maxThreadCount);
     }
 
     private void generateMatrices(int rowCount, int commonCount, int columnCount) {
