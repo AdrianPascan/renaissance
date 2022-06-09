@@ -22,7 +22,7 @@ import static org.renaissance.Benchmark.*;
 @Parameter(name = "pmc", defaultValue = "1000", summary = "[Partial multiplication] partial multiplication count (no. of partial multiplications)")
 @Parameter(name = "cs", defaultValue = "seq", summary = "Concurrency strategy: seq (sequential = no concurrency)," +
         " thread (threads for partial multiplications), pool (thread pool for partial multiplications)")
-@Parameter(name = "csc", defaultValue = "100", summary = "[Concurrency strategy] max. thread count (no. of threads) for thread pool")
+@Parameter(name = "csc", defaultValue = "16", summary = "[Concurrency strategy] max. thread count (no. of threads) for thread pool")
 public final class MatrixMultiply implements Benchmark {
 
     private JavaMatrixMultiply benchmark;
