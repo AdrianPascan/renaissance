@@ -1,4 +1,15 @@
 
+## My Contribution
+
+A new benchmark *matrix-multiply* which aims at showing how the partial multiplication method & count and the
+concurrency strategy used in computing the partial multiplications impact performance.
+
+Please check the *matrix-multiply* branch.
+
+
+[Official README.md:]
+
+
 ## Renaissance Benchmark Suite
 
 <p align="center">
